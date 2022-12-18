@@ -1,4 +1,4 @@
-FROM kiuber/gui-docker:latest
+FROM kiuber/gui-docker:ubuntu-20.04
 
 USER root
 
