@@ -1,0 +1,24 @@
+FROM kiuber/gui-docker:ubuntu-22.04
+
+USER root
+
+RUN export DEBIAN_FRONTEND=noninteractive \
+    && apt-get update -y \
+    && apt-get install -y software-properties-common \
+    && add-apt-repository ppa:obsproject/obs-studio \
+    && apt-get update -y \
+    && apt-get install -y vlc ffmpeg obs-studio \
+    && apt-get install -y binutils \
+    && apt-get clean -y
+
+# https://forum.qt.io/topic/136058/libqt6core-so-6-cannot-open-shared-object-file-even-though-it-exists-seems-to-depend-on-docker-host-os
+RUN strip --remove-section=.note.ABI-tag /usr/lib/x86_64-linux-gnu/libQt6Core.so.6
+
+RUN echo "?package(bash):needs=\"X11\" section=\"DockerCustom\" title=\"OBS Screencast\" command=\"obs\"" >> /usr/share/menu/custom-docker && update-menus
+
+# install obs-multi-rtmp 
+RUN apt install -y build-essential cmake mesa-common-dev qt6-base-dev
+RUN git clone https://github.com/sorayuki/obs-multi-rtmp
+RUN cd obs-multi-rtmp && cmake -S . -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build && cmake --install build
+
+USER dockerUser
